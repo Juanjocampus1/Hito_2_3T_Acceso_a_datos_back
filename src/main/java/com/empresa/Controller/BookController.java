@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/book")
+@CrossOrigin(origins = "http://localhost:3000")
 public class BookController {
 
     @Autowired
@@ -69,6 +70,34 @@ public class BookController {
         bookServiceimpl.save(book);
 
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/updateById/{id}")
+    public ResponseEntity<?> updateById(@PathVariable Long id, @RequestBody BookDTO bookDTO) {
+        Optional<Book> bookOptional = bookServiceimpl.findById(id);
+
+        if (bookOptional.isPresent()) {
+            Book book = bookOptional.get();
+            book.setTitle(bookDTO.getTitle());
+            book.setAuthor(bookDTO.getAuthor());
+            book.setIsbn(bookDTO.getIsbn());
+            book.setPrice(bookDTO.getPrice());
+            book.setStock(bookDTO.getStock());
+
+            Book updatedBook = bookServiceimpl.save(book);
+            BookDTO updatedBookDTO = BookDTO.builder()
+                    .id(updatedBook.getId())
+                    .title(updatedBook.getTitle())
+                    .author(updatedBook.getAuthor())
+                    .isbn(updatedBook.getIsbn())
+                    .price(updatedBook.getPrice())
+                    .stock(updatedBook.getStock())
+                    .build();
+
+            return ResponseEntity.ok(updatedBookDTO);
+        }
+
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/delete/{id}")
